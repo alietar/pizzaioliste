@@ -12,8 +12,9 @@
          <img src="img/logo.png"/>
          <h1>Pizzaioliste</h1>
          <div>
-            <a href="#team">L'équipe</a>
+            <a href="#order">Commander</a>
             <a href="#sos">Carte des SOS</a>
+            <a href="#team">L'équipe</a>
             <a href="#reseaux">Réseaux</a>
          </div>
          <a id="menu-btn" href="#menu"><span class="material-symbols-outlined">menu</span></a>
@@ -21,6 +22,61 @@
       <section></section>
       <section id="menu"></section>
       <main>
+         <form id="order">
+            <div style="grid-area: fname;">
+               <label for="fname">Prénom</label>
+               <input type="text" id="fname" name="firstname" placeholder="Leonardo" required>
+            </div>
+            <div style="grid-area: lname;">
+               <label for="lname">Nom</label>
+               <input type="text" id="lname" name="lastname" placeholder="da Vinci" required>
+            </div>
+            <div style="grid-area: bat;">
+               <label for="bat">Bat</label>
+               <select id="bat">
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+               </select>
+            </div>
+            <div style="grid-area: nb;">
+               <label for="nb">N° turne</label>
+               <input type="number" id="nb" name="nb" placeholder="231" required>
+            </div>
+            <div style="grid-area: sos;">
+               <label for="sos">SOS</label>
+               <select id="sos">
+                  <option value="0">Lorem</option>
+                  <option value="1">Ipsum</option>
+                  <option value="2">Dolor</option>
+                  <option value="3">Sit</option>
+                  <option value="4">Amet</option>
+               </select>
+            </div>
+            <div style="grid-area: email;">
+               <label for="email">Email de l'INSA</label>
+               <input type="email" id="email" name="email" pattern=".+@insa-lyon\.fr" placeholder="leonardo.da-vinci@insa-lyon.fr" required>
+            </div>
+            <div id="confirmation-container" style="grid-area: condition;">
+               <label for="confirmation">J'accepte les conditions des SOS*</label>
+               <input type="checkbox" id="confirmation" name="confirmation" value="confirmation" required />
+            </div>
+            <div style="grid-area: send;">
+               <input id="submit" type="submit" value="Commander" />
+            </div>
+         </form>
+
+         <h1 id="sos">Carte des SOS</h1>
+         <ul>
+            <li>Lorem</li>
+            <li>Ipsum</li>
+            <li>Dolor</li>
+            <li>Sit</li>
+            <li>Amet</li>
+         </ul>
+
          <h1 id="team">L'équipe</h1>
          <div id="team-container">
             <div>
@@ -59,21 +115,12 @@
                <span>Thomas</span>
             </div>
          </div>
-         
-         <h1 id="sos">Carte des SOS</h1>
-         <ul>
-            <li>Lorem</li>
-            <li>Ipsum</li>
-            <li>Dolor</li>
-            <li>Sit</li>
-            <li>Amet</li>
-         </ul>
 
          <h1 id="reseaux">Réseaux</h1>
          <div id="reseaux-container">
-            <a><img src="img/instagram.svg" height="24px"/></a>
-            <a><img src="img/youtube.svg" height="24px"/></a>
-            <a><img src="img/messenger.svg" height="24px"/></a>
+            <a href="https://instagram.com"><img src="img/instagram.svg" height="24px"/></a>
+            <a href="htps://youtube.com"><img src="img/youtube.svg" height="24px"/></a>
+            <a href="https://messenger.com"><img src="img/messenger.svg" height="24px"/></a>
          </div>
       </main>
       <script type="text/javascript" src="main.js"></script>
