@@ -124,7 +124,7 @@ header._scrolled2 h1 {
 }
 
 header._scrolled2 div {
-   opacity: 0
+   opacity: 0;
    visibility: hidden;
 }
 
@@ -154,13 +154,14 @@ main h1 {
 
 
 html {
+   scroll-snap-stop: always;
    scroll-snap-type: y mandatory;
    scroll-behavior: smooth;
    background-color: var(--bg);
    font-family: "sans-serif";
 }
 
-#team, #sos, #reseaux {
+#order-header, #team, #sos-header, #reseaux {
    scroll-snap-align: start;
 }
 
@@ -216,13 +217,13 @@ html {
 
 
 form {
-   scroll-snap-align: start;
    display: grid;
    gap: 1rem;
    grid-template-areas:
       "fname lname"
       "bat nb"
       "sos sos"
+      "timeslot timeslot"
       "email email"
       "condition condition"
       "send send";

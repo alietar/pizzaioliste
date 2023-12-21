@@ -22,18 +22,19 @@
       <section></section>
       <section id="menu"></section>
       <main>
-         <form id="order">
+         <h1 id="order-header">Commande</h1>
+         <form id="order" method="post" action="http://127.0.0.1:8100/" target="hiddenFrame">
             <div style="grid-area: fname;">
                <label for="fname">Prénom</label>
-               <input type="text" id="fname" name="firstname" placeholder="Leonardo" required>
+               <input type="text" id="fname" name="fname" placeholder="Leonardo" required>
             </div>
             <div style="grid-area: lname;">
                <label for="lname">Nom</label>
-               <input type="text" id="lname" name="lastname" placeholder="da Vinci" required>
+               <input type="text" id="lname" name="lname" placeholder="da Vinci" required>
             </div>
             <div style="grid-area: bat;">
                <label for="bat">Bat</label>
-               <select id="bat">
+               <select id="bat" name="bat">
                   <option value="A">A</option>
                   <option value="B">B</option>
                   <option value="C">C</option>
@@ -47,7 +48,7 @@
             </div>
             <div style="grid-area: sos;">
                <label for="sos">SOS</label>
-               <select id="sos">
+               <select id="sos" name="sos">
                   <option value="0">Lorem</option>
                   <option value="1">Ipsum</option>
                   <option value="2">Dolor</option>
@@ -55,20 +56,30 @@
                   <option value="4">Amet</option>
                </select>
             </div>
+            <div style="grid-area: timeslot">
+               <label for="timeslot">Horaire : 7-8h/12-14h/18-21h, vendredi 7-8h</label>
+               <input
+              type="datetime-local"
+              id="timeslot"
+              name="timeslot"
+              value="2024-02-19T06:00"
+              min="2024-02-19T06:00"
+              max="2024-02-23T08:00" />
+            </div>
             <div style="grid-area: email;">
                <label for="email">Email de l'INSA</label>
                <input type="email" id="email" name="email" pattern=".+@insa-lyon\.fr" placeholder="leonardo.da-vinci@insa-lyon.fr" required>
             </div>
             <div id="confirmation-container" style="grid-area: condition;">
                <label for="confirmation">J'accepte les conditions des SOS*</label>
-               <input type="checkbox" id="confirmation" name="confirmation" value="confirmation" required />
+               <input type="checkbox" id="confirmation" name="confirmation" value="y" required />
             </div>
             <div style="grid-area: send;">
                <input id="submit" type="submit" value="Commander" />
             </div>
          </form>
 
-         <h1 id="sos">Carte des SOS</h1>
+         <h1 id="sos-header">Carte des SOS</h1>
          <ul>
             <li>Lorem</li>
             <li>Ipsum</li>
