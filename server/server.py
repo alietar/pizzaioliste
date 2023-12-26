@@ -162,7 +162,6 @@ def get_db_path() -> Path:
 
 async def init_db(app: web.Application) -> AsyncIterator[None]:
     db = await aiosqlite.connect(get_db_path())
-    #db.row_factory = aiosqlite.Row Not Useful?
     app["DB"] = db
     yield
     await db.close()

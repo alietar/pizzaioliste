@@ -69,7 +69,7 @@ document.getElementById("submit").addEventListener("click", function(event){
     if (xhr.status == 200) {
       console.log(JSON.parse(xhr.responseText));
     } else {
-      console.log(JSON.parse(xhr.responseText));
+      alert('Erreur : ' + JSON.parse(xhr.responseText)['error'])
     }
   };
 
