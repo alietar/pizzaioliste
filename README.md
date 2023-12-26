@@ -8,5 +8,12 @@ Cela passe par une interface web client et un serveur backend qui stocke les com
 - [x] Détails de commande : prénom, nom, email, n°sos, créneau du sos, bat, turne
 - [x] Vérification de la limite de 2 sos/jour/personne (via l'email du client)
 - [ ] Envoie de la demande de SOS au serveur discord
-- [ ] Interface web admin pour consulter la liste des SOS commandés et effectués
+- [X] Interface web admin pour consulter la liste des SOS commandés et effectués
 - [ ] Validation du SOS une fois qu'il est achevé (via discord ou l'interface web admin)
+
+
+## A faire avant le déployement
+
+- [ ] Améliorer les messages d'erreur, notamment quand il a plus de 2 sos reservé
+- [ ] Mettre à jour les SOS, et leur description
+- [ ] Changer le mot de passe, et ne pas le mettre en clair :)
