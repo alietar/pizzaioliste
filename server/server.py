@@ -8,7 +8,9 @@ import sqlite3
 
 db_file_name = "form.db"
 
-sos_path = 'sos.json'
+sos_path = "sos.json"
+
+credential = "pwd"
 
 def get_sos(path):
     _sos = []
@@ -26,7 +28,58 @@ routes = web.RouteTableDef()
 
 @routes.get('/')
 async def handler(request):
-    return web.Response(status=501)
+    print(f"-> SOS request from {request.host}")
+
+    response_content = {}
+    status = 200
+    form = []
+    db = request.config_dict["DB"]
+
+    try:
+        if request.headers["Credential"] == credential:
+            print("Client requests the SOS")
+        else:
+            raise Exception("Credentials are incorrect")
+
+
+        async with db.execute(
+            "SELECT * FROM orders"
+        ) as cursor:
+            lines = await cursor.fetchall()
+            print(lines)
+            response_content = {"format": ["id", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "Fait 0Non, 1Oui"], "sos": lines}
+
+
+    except Exception as e:
+        print("An exception occurred")
+        print(e)
+
+        response_content = {"error": str(e)}
+        status = 400
+
+
+    json_string = json.dumps(response_content)
+    encoded_string = json_string.encode(encoding='utf_8')
+
+    headers = {
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Origin': 'http://localhost:8000',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-type, Credential",
+        "Content-Type": "application/json",
+        "Content-Length": str(len(encoded_string))
+    }
+
+    resp = web.Response(headers=headers, status=status)
+    await resp.prepare(request)
+    await resp.write(encoded_string)
+
+    # Return if the sos order isn't valid
+    if status == 400:
+        return resp
+
+    return resp
+
 
 
 @routes.options('/')
@@ -36,8 +89,8 @@ async def cors_options(request):
     headers = {
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Allow-Origin': 'http://localhost:8000',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-type"
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-type, Credential"
     }
 
     return web.Response(headers=headers)
@@ -117,8 +170,8 @@ async def add_sos(request):
     headers = {
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Allow-Origin': 'http://localhost:8000',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-type",
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-type, Credential",
         "Content-Type": "application/json",
         "Content-Length": str(len(encoded_string))
     }
@@ -190,7 +243,6 @@ def try_make_db() -> None:
             sos INTEGER,
             sos_name TEXT,
             timeslot DATETIME,
-            day INT,
             bat TEXT,
             turne INTEGER,
             done BOOLEAN)
