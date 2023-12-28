@@ -1,5 +1,2 @@
-shell.nix
-server/database.py
-server/main.py
-server/form.py
-server/form.db
+/shell.nix
+/server/assets/
