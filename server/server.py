@@ -2,26 +2,38 @@ from aiohttp import web
 import aiosqlite
 import json
 import datetime
-from pathlib import Path
 from typing import Any, AsyncIterator, Awaitable, Callable, Dict
-import sqlite3
 
-db_file_name = "form.db"
+from database import DataBase
 
-sos_path = "sos.json"
+sos_path = "assets/sos.json"
+credentials_path = "assets/credentials.json"
+db_path = "assets/database.db"
 
-credential = "pwd"
+with open(credentials_path) as f:
+    _file_content = json.load(f)
+    credential = _file_content["admin_password"]
+    webhook_url = _file_content["discord_webhook_url"]
 
-def get_sos(path):
-    _sos = []
+with open(sos_path) as f:
+    sos = json.load(f)
 
-    with open(path) as f:
-        _sos = json.load(f)
 
-    return _sos
 
-sos = get_sos(sos_path)
+def generate_headers(data = {}):
+    json_string = json.dumps(data)
+    encoded_data = json_string.encode(encoding='utf_8')
 
+    headers = {
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Origin': 'http://localhost:8000',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        "Access-Control-Allow-Headers": "X-Requested-With, Content-type, Credential",
+        "Content-Type": "application/json",
+        "Content-Length": str(len(encoded_data))
+    }
+
+    return headers, encoded_data
 
 
 routes = web.RouteTableDef()
@@ -42,12 +54,9 @@ async def handler(request):
             raise Exception("Credentials are incorrect")
 
 
-        async with db.execute(
-            "SELECT * FROM orders"
-        ) as cursor:
-            lines = await cursor.fetchall()
-            print(lines)
-            response_content = {"format": ["id", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "Fait 0Non, 1Oui"], "sos": lines}
+        lines = await db.get_all_sos()
+
+        response_content = {"format": ["id", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "Fait 0Non, 1Oui"], "sos": lines}
 
 
     except Exception as e:
@@ -57,22 +66,11 @@ async def handler(request):
         response_content = {"error": str(e)}
         status = 400
 
-
-    json_string = json.dumps(response_content)
-    encoded_string = json_string.encode(encoding='utf_8')
-
-    headers = {
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': 'http://localhost:8000',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-type, Credential",
-        "Content-Type": "application/json",
-        "Content-Length": str(len(encoded_string))
-    }
+    headers, data = generate_headers(response_content)
 
     resp = web.Response(headers=headers, status=status)
     await resp.prepare(request)
-    await resp.write(encoded_string)
+    await resp.write(data)
 
     # Return if the sos order isn't valid
     if status == 400:
@@ -86,12 +84,7 @@ async def handler(request):
 async def cors_options(request):
     print("-> Cors request")
 
-    headers = {
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': 'http://localhost:8000',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-type, Credential"
-    }
+    headers, data = generate_headers()
 
     return web.Response(headers=headers)
 
@@ -139,21 +132,12 @@ async def add_sos(request):
         form.append(False)
 
 
-        # Checking if the client did not already order 2 sos the same day
-        async with db.execute(
-            "SELECT timeslot FROM orders WHERE email = ?", [form[3]]
-        ) as cursor:
-            timeslots = await cursor.fetchall()
-            days = []
+        # Checks if the client didn't already ordered two sos for the same day
+        asked_day = datetime.datetime.strptime(form[6], '%Y-%m-%dT%H:%M').weekday() # form[6] is the timeslot of the ordered sos
+        has_reached_limit = await db.check_user_limit(form[3], asked_day) # form[3] is the email from the form
 
-            sos_day = datetime.datetime.strptime(form[6], '%Y-%m-%dT%H:%M').weekday()
-
-            for timeslot in timeslots:
-                date_timeslot = datetime.datetime.strptime(timeslot[0], '%Y-%m-%dT%H:%M')
-                days.append(date_timeslot.weekday())
-
-            if days.count(sos_day) >= 2:
-                raise Exception("Two SOS are already ordered for this day")
+        if has_reached_limit:
+            raise Exception("Two SOS are already ordered for this day")
 
 
     except Exception as e:
@@ -163,22 +147,11 @@ async def add_sos(request):
         response_content = {"error": str(e)}
         status = 400
 
-
-    json_string = json.dumps(response_content)
-    encoded_string = json_string.encode(encoding='utf_8')
-
-    headers = {
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': 'http://localhost:8000',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-type, Credential",
-        "Content-Type": "application/json",
-        "Content-Length": str(len(encoded_string))
-    }
+    headers, data = generate_headers(response_content)
 
     resp = web.Response(headers=headers, status=status)
     await resp.prepare(request)
-    await resp.write(encoded_string)
+    await resp.write(data)
 
     # Return if the sos order isn't valid
     if status == 400:
@@ -186,38 +159,18 @@ async def add_sos(request):
 
 
     # Adding sos request to the database
-
-    async with db.execute("""
-        INSERT INTO orders (order_date,
-                            fname,
-                            lname,
-                            email,
-                            sos,
-                            sos_name,
-                            timeslot,
-                            bat,
-                            turne,
-                            done) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", form,
-    ) as cursor:
-        _id = cursor.lastrowid
-    await db.commit()
-
-    print(_id)
+    await db.add_sos(form)
 
     # Responds to the client
     return resp
 
 
-
-def get_db_path() -> Path:
-    return db_file_name
-
-
 async def init_db(app: web.Application) -> AsyncIterator[None]:
-    db = await aiosqlite.connect(get_db_path())
+    db = DataBase()
+    await db.connect()
     app["DB"] = db
     yield
-    await db.close()
+    await app["DB"].close()
 
 
 async def init_app() -> web.Application:
@@ -228,32 +181,69 @@ async def init_app() -> web.Application:
     return app
 
 
-def try_make_db() -> None:
-    db_path = get_db_path()
-
-    with sqlite3.connect(db_path) as conn:
-        cur = conn.cursor()
-        cur.execute(
-            """CREATE TABLE IF NOT EXISTS orders (
-            id INTEGER PRIMARY KEY,
-            order_date DATETIME,
-            fname TEXT,
-            lname TEXT,
-            email TEXT,
-            sos INTEGER,
-            sos_name TEXT,
-            timeslot DATETIME,
-            bat TEXT,
-            turne INTEGER,
-            done BOOLEAN)
-        """
-        )
-
-        conn.commit()
-
-
-
-
 if __name__ == "__main__":
-    try_make_db()
     web.run_app(init_app(), port=8100)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import requests
+import json
+
+### Needs to check the host
+
+
+sos = ["Lorem", "Ipsum", "Dolor", "Sit", "Amet"]
+
+
+
+
+def add_sos(form):
+    send_sos(form)
+
+
+def send_sos(form):
+    description = f"Prénom : {form['fname']}\nNom : {form['lname']}\nBat : {form['bat']}\nTurne : {form['nb']}"
+
+    data = {
+        "content": "Nouvelle demande de SOS",
+        "embeds": [{
+            "title": form["sos_name"],
+            "description": description,
+            "color": 2326507,
+            "author": {
+                "name": form["email"]
+            },
+            "footer": {
+                "text": "Pas de demande particulière"
+            },
+            "timestamp": "2023-12-11T23:00:00.000Z"
+        }]
+    }
+
+    print(data)
+
+
+    result = requests.post(url, json = data)
+
+    try:
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    else:
+        print("Payload delivered successfully, code {}.".format(result.status_code))
+"""
