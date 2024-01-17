@@ -1,8 +1,10 @@
 from aiohttp import web
 import aiosqlite
+import asyncio
 import json
 import datetime
 from typing import Any, AsyncIterator, Awaitable, Callable, Dict
+import discordBot
 
 from database import DataBase
 
@@ -14,6 +16,7 @@ with open(credentials_path) as f:
     _file_content = json.load(f)
     credential = _file_content["admin_password"]
     webhook_url = _file_content["discord_webhook_url"]
+    discord_token = _file_content["discord_token"]
 
 with open(sos_path) as f:
     sos = json.load(f)
@@ -96,7 +99,6 @@ async def add_sos(request):
     content = await request.json()
     response_content = {}
     status = 200
-    form = []
     db = request.config_dict["DB"]
 
     print(content)
@@ -119,17 +121,19 @@ async def add_sos(request):
 
         print('Form is valid')
 
+        form = [
+            str(datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")), # order_date
+            content["fname"], # first name
+            content["lname"], # last name
+            content["email"], # email
+            int(content["sos"]), # sos id
+            list(sos.keys())[int(content["sos"])], # sos name
+            content["timeslot"], # timeslot
+            content["bat"], # bat
+            int(content["nb"]), # turne
+            False # is the sos done
+        ]
 
-        form.append(str(datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"))) # order_date
-        form.append(content["fname"]) # first name
-        form.append(content["lname"]) # last name
-        form.append(content["email"]) # email
-        form.append(int(content["sos"])) # sos id
-        form.append(list(sos.keys())[form[4]]) # sos name
-        form.append(content["timeslot"]) # timeslot
-        form.append(content["bat"]) # bat
-        form.append(int(content["nb"])) #turne
-        form.append(False)
 
 
         # Checks if the client didn't already ordered two sos for the same day
@@ -161,6 +165,9 @@ async def add_sos(request):
     # Adding sos request to the database
     await db.add_sos(form)
 
+    # Send message on discord
+    request.config_dict["Queue"].put_nowait(form)
+
     # Responds to the client
     return resp
 
@@ -173,77 +180,27 @@ async def init_db(app: web.Application) -> AsyncIterator[None]:
     await app["DB"].close()
 
 
+async def init_bot(app: web.Application) -> AsyncIterator[None]:
+    queue = asyncio.Queue()
+    app["Queue"] = queue
+
+    bot = discordBot.Bot(queue)
+    task = asyncio.create_task(bot.start(discord_token))
+
+
+    yield
+
+    task.cancel()
+
+
 async def init_app() -> web.Application:
     app = web.Application()
     app.add_routes(routes)
     app.cleanup_ctx.append(init_db)
+    app.cleanup_ctx.append(init_bot)
 
     return app
 
 
 if __name__ == "__main__":
-    web.run_app(init_app(), port=8100)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import requests
-import json
-
-### Needs to check the host
-
-
-sos = ["Lorem", "Ipsum", "Dolor", "Sit", "Amet"]
-
-
-
-
-def add_sos(form):
-    send_sos(form)
-
-
-def send_sos(form):
-    description = f"Prénom : {form['fname']}\nNom : {form['lname']}\nBat : {form['bat']}\nTurne : {form['nb']}"
-
-    data = {
-        "content": "Nouvelle demande de SOS",
-        "embeds": [{
-            "title": form["sos_name"],
-            "description": description,
-            "color": 2326507,
-            "author": {
-                "name": form["email"]
-            },
-            "footer": {
-                "text": "Pas de demande particulière"
-            },
-            "timestamp": "2023-12-11T23:00:00.000Z"
-        }]
-    }
-
-    print(data)
-
-
-    result = requests.post(url, json = data)
-
-    try:
-        result.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        print(err)
-    else:
-        print("Payload delivered successfully, code {}.".format(result.status_code))
-"""
+    web.run_app(init_app(), port=8200)
