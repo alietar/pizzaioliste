@@ -28,7 +28,7 @@ class Bot(commands.Bot):
             sos = await self.queue.get()
             print("Sending sos to the discord")
 
-            await self.send_sos(sos)
+            #await self.send_sos(sos)
 
             self.queue.task_done()
 

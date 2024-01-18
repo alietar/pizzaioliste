@@ -41,7 +41,7 @@ def generate_headers(data = {}):
 
 routes = web.RouteTableDef()
 
-@routes.get('/')
+@routes.get('/api')
 async def handler(request):
     print(f"-> SOS request from {request.host}")
 
@@ -83,16 +83,18 @@ async def handler(request):
 
 
 
-@routes.options('/')
+@routes.options('/api')
 async def cors_options(request):
     print("-> Cors request")
 
     headers, data = generate_headers()
 
+    print(headers)
+
     return web.Response(headers=headers)
 
 
-@routes.post('/')
+@routes.post('/api')
 async def add_sos(request):
     print(f"-> SOS request from {request.host}")
 
@@ -196,6 +198,7 @@ async def init_bot(app: web.Application) -> AsyncIterator[None]:
 async def init_app() -> web.Application:
     app = web.Application()
     app.add_routes(routes)
+    app.router.add_static("/", "../website/", show_index=True)
     app.cleanup_ctx.append(init_db)
     app.cleanup_ctx.append(init_bot)
 
@@ -203,4 +206,4 @@ async def init_app() -> web.Application:
 
 
 if __name__ == "__main__":
-    web.run_app(init_app(), port=8200)
+    web.run_app(init_app(), port=8000)

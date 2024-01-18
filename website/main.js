@@ -60,7 +60,7 @@ document.getElementById("submit").addEventListener("click", function(event){
 
   const xhr = new XMLHttpRequest();
 
-  xhr.open("POST", "http://127.0.0.1:8200/");
+  xhr.open("POST", "http://127.0.0.1:8000/api");
   xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
 
   xhr.onload = () => {
