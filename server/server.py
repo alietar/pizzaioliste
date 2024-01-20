@@ -5,15 +5,19 @@ import json
 import datetime
 from typing import Any, AsyncIterator, Awaitable, Callable, Dict
 import discordBot
-from pathlib import Path
-
+import os
 
 from database import DataBase
 
-sos_path = Path("assets/sos.json").absolute()
-credentials_path = Path("assets/credentials.json").absolute()
-db_path = Path("assets/database.db").absolute()
-website_path = Path("../website/").absolute()
+
+absolute_path = os.getcwd()
+
+print(absolute_path)
+
+sos_path = absolute_path + "/assets/sos.json"
+credentials_path = absolute_path + "/assets/credentials.json"
+db_path = absolute_path + "/assets/database.db"
+website_path = absolute_path + "/../website/"
 
 
 with open(credentials_path) as f:
@@ -24,7 +28,6 @@ with open(credentials_path) as f:
 
 with open(sos_path) as f:
     sos = json.load(f)
-
 
 
 def generate_headers(data = {}):
