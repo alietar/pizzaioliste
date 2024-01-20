@@ -5,12 +5,16 @@ import json
 import datetime
 from typing import Any, AsyncIterator, Awaitable, Callable, Dict
 import discordBot
+from pathlib import Path
+
 
 from database import DataBase
 
-sos_path = "assets/sos.json"
-credentials_path = "assets/credentials.json"
-db_path = "assets/database.db"
+sos_path = Path("assets/sos.json").absolute()
+credentials_path = Path("assets/credentials.json").absolute()
+db_path = Path("assets/database.db").absolute()
+website_path = Path("../website/").absolute()
+
 
 with open(credentials_path) as f:
     _file_content = json.load(f)
@@ -175,7 +179,7 @@ async def add_sos(request):
 
 
 async def init_db(app: web.Application) -> AsyncIterator[None]:
-    db = DataBase()
+    db = DataBase(path_to_db=db_path)
     await db.connect()
     app["DB"] = db
     yield
@@ -198,7 +202,7 @@ async def init_bot(app: web.Application) -> AsyncIterator[None]:
 async def init_app() -> web.Application:
     app = web.Application()
     app.add_routes(routes)
-    app.router.add_static("/", "../website/", show_index=True)
+    app.router.add_static("/", website_path, show_index=True)
     app.cleanup_ctx.append(init_db)
     app.cleanup_ctx.append(init_bot)
 
