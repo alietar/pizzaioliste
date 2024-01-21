@@ -9,15 +9,21 @@ import os
 
 from database import DataBase
 
+import sys
 
-absolute_path = os.getcwd()
+if len(sys.argv) != 2:
+    absolute_path = "./"
+else:
+    absolute_path = sys.argv[1]
 
 print(absolute_path)
 
-sos_path = absolute_path + "/assets/sos.json"
-credentials_path = absolute_path + "/assets/credentials.json"
-db_path = absolute_path + "/assets/database.db"
-website_path = absolute_path + "/../website/"
+sos_path = absolute_path + "assets/sos.json"
+credentials_path = absolute_path + "assets/credentials.json"
+db_path = absolute_path + "assets/database.db"
+website_path = absolute_path + "../website/"
+
+print(sos_path)
 
 
 with open(credentials_path) as f:
