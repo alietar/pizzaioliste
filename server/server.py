@@ -54,71 +54,75 @@ def generate_headers(data = {}):
     return headers, encoded_data
 
 
+async def respond(incoming_request, content = {}, status = 200):
+    headers, encoded_content = generate_headers(content)
+
+    response_request = web.Response(headers=headers, status=status)
+
+    await response_request.prepare(incoming_request)
+    await response_request.write(encoded_content)
+
+    return response_request
+
+
 routes = web.RouteTableDef()
 
-@routes.get('/api')
-async def handler(request):
-    print(f"-> SOS request from {request.host}")
+@web.middleware
+async def print_incoming_request(request, handler):
+    print(f"Incoming {request.method} request -> {request.rel_url}")
 
+    return await handler(request)
+
+
+
+
+##### Add middle man to print incoming requests
+
+
+### Get a list of the available SOS
+
+@routes.get("/api/student")
+async def available_sos(request):
+    print("Sending the list of available SOS")
+    return await respond(request, content=sos)
+
+
+### Get a list of the asked SOS from the students
+
+@routes.get('/api/admin')
+async def asked_sos(request):
     response_content = {}
     status = 200
-    form = []
-    db = request.config_dict["DB"]
 
-    try:
-        if request.headers["Credential"] == credential:
-            print("Client requests the SOS")
-        else:
-            raise Exception("Credentials are incorrect")
+    # Checks the credential
+    if request.headers["Credential"] != credential:
+        status = 401
+
+    else:
+        db = request.config_dict["DB"]
+        sos_list = await db.get_all_sos()
+
+        response_content = {"format": ["id", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "Fait 0Non, 1Oui"], "sos": sos_list}
+
+    return await respond(request, content=response_content, status=status)
 
 
-        lines = await db.get_all_sos()
+### Cors request
 
-        response_content = {"format": ["id", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "Fait 0Non, 1Oui"], "sos": lines}
-
-
-    except Exception as e:
-        print("An exception occurred")
-        print(e)
-
-        response_content = {"error": str(e)}
-        status = 400
-
-    headers, data = generate_headers(response_content)
-
-    resp = web.Response(headers=headers, status=status)
-    await resp.prepare(request)
-    await resp.write(data)
-
-    # Return if the sos order isn't valid
-    if status == 400:
-        return resp
-
-    return resp
+#@routes.options('/api')
+#async def cors_options(request):
+#    return await respond(request)
 
 
 
-@routes.options('/api')
-async def cors_options(request):
-    print("-> Cors request")
+### Add a SOS to the database
 
-    headers, data = generate_headers()
-
-    print(headers)
-
-    return web.Response(headers=headers)
-
-
-@routes.post('/api')
+@routes.post('/api/student')
 async def add_sos(request):
-    print(f"-> SOS request from {request.host}")
-
     content = await request.json()
     response_content = {}
     status = 200
     db = request.config_dict["DB"]
-
-    print(content)
 
     # Try to get informations from the form, if it fails then the data is incorrect
     try:
@@ -152,13 +156,18 @@ async def add_sos(request):
         ]
 
 
-
         # Checks if the client didn't already ordered two sos for the same day
         asked_day = datetime.datetime.strptime(form[6], '%Y-%m-%dT%H:%M').weekday() # form[6] is the timeslot of the ordered sos
         has_reached_limit = await db.check_user_limit(form[3], asked_day) # form[3] is the email from the form
 
         if has_reached_limit:
             raise Exception("Two SOS are already ordered for this day")
+
+        # Adding sos request to the database
+        await db.add_sos(form)
+
+        # Send message on discord
+        #request.config_dict["Queue"].put_nowait(form)
 
 
     except Exception as e:
@@ -168,25 +177,9 @@ async def add_sos(request):
         response_content = {"error": str(e)}
         status = 400
 
-    headers, data = generate_headers(response_content)
 
-    resp = web.Response(headers=headers, status=status)
-    await resp.prepare(request)
-    await resp.write(data)
+    return await respond(request, content=response_content, status=status)
 
-    # Return if the sos order isn't valid
-    if status == 400:
-        return resp
-
-
-    # Adding sos request to the database
-    await db.add_sos(form)
-
-    # Send message on discord
-    request.config_dict["Queue"].put_nowait(form)
-
-    # Responds to the client
-    return resp
 
 
 async def init_db(app: web.Application) -> AsyncIterator[None]:
@@ -201,13 +194,13 @@ async def init_bot(app: web.Application) -> AsyncIterator[None]:
     queue = asyncio.Queue()
     app["Queue"] = queue
 
-    bot = discordBot.Bot(queue)
-    task = asyncio.create_task(bot.start(discord_token))
+    #bot = discordBot.Bot(queue)
+    #task = asyncio.create_task(bot.start(discord_token))
 
 
     yield
 
-    task.cancel()
+    #task.cancel()
 
 
 async def root_handler(request):
@@ -215,7 +208,7 @@ async def root_handler(request):
 
 
 async def init_app() -> web.Application:
-    app = web.Application()
+    app = web.Application(middlewares=[print_incoming_request])
     app.add_routes(routes)
     app.router.add_route('*', '/', root_handler)
     app.router.add_static("/", website_path)

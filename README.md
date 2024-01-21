@@ -18,3 +18,13 @@ Cela passe par une interface web client et un serveur backend qui stocke les com
 - [ ] Mettre à jour les SOS, et leur description
 - [ ] Changer le mot de passe, et ne pas le mettre en clair :)
 - [ ] Affichage des bons SOS automatiquement sur le site wen
+
+## API
+
+|Endpoint|Description|Method|Query|Auth|
+|---|---|---|---|---|---|
+|/|Static ressources (index.html, css, etc.)|GET|||
+|/api/student|Add a new SOS|POST|||
+|/api/student|Get a list of the available SOS|GET|||
+|/api/admin|Gather all the SOS|GET|done=[true/false]|X|
+|/api/admin|Updates an SOS (eg. it is done)|PUT||X|
