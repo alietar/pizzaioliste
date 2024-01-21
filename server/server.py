@@ -210,10 +210,15 @@ async def init_bot(app: web.Application) -> AsyncIterator[None]:
     task.cancel()
 
 
+async def root_handler(request):
+    return web.HTTPFound('/index.html')
+
+
 async def init_app() -> web.Application:
     app = web.Application()
     app.add_routes(routes)
-    app.router.add_static("/", website_path, show_index=True)
+    app.router.add_route('*', '/', root_handler)
+    app.router.add_static("/", website_path)
     app.cleanup_ctx.append(init_db)
     app.cleanup_ctx.append(init_bot)
 
