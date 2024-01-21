@@ -33,7 +33,33 @@ function scrollFunction() {
 
 
 
-document.getElementById("submit").addEventListener("click", function(event){
+async function displaySOS() {
+  const response = await fetch("/api/student", {
+    method: "GET"
+  });
+
+  const availableSOS = await response.json();
+    
+  console.log("Success:", availableSOS);
+      
+  if (!response.ok) {
+    alert('Erreur')
+  } else {
+    console.log(availableSOS)
+
+    sosSelect = document.getElementById('sos');
+
+    for (const [idx, name] of Object.entries(availableSOS)) {
+      sosSelect.innerHTML += '<option value="' + toString(idx) + '">' + name + '</option>';;
+    }
+  }
+}
+
+displaySOS()
+
+
+
+document.getElementById("submit").addEventListener("click", async function(event){
   event.preventDefault()
 
   let formData = new FormData(document.querySelector('form'));
@@ -55,24 +81,21 @@ document.getElementById("submit").addEventListener("click", function(event){
       }
       object[key].push(value);
   });
-  var json = JSON.stringify(object);
 
 
-  const xhr = new XMLHttpRequest();
+  const response = await fetch("/api/student", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(object),
+  });
 
-  xhr.open("POST", "http://127.0.0.1:8000/api");
-  xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
-
-  xhr.onload = () => {
-    console.log(xhr.status);
-
-    if (xhr.status == 200) {
-      console.log(JSON.parse(xhr.responseText));
-    } else {
-      alert('Erreur : ' + JSON.parse(xhr.responseText)['error'])
-    }
-  };
-
-  console.log(json);
-  xhr.send(json);
+  const result = await response.json();
+  
+  console.log("Success:", result);
+    
+  if (!response.ok) {
+    alert('Erreur')
+  }
 });
