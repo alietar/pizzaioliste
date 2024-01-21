@@ -5,25 +5,27 @@ import json
 import datetime
 from typing import Any, AsyncIterator, Awaitable, Callable, Dict
 import discordBot
-import os
+import sys
 
 from database import DataBase
 
-import sys
 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     absolute_path = "./"
 else:
     absolute_path = sys.argv[1]
 
-print(absolute_path)
+
+if len(sys.argv) < 3:
+    port = 8000
+else:
+    port = sys.argv[2]
+
 
 sos_path = absolute_path + "assets/sos.json"
 credentials_path = absolute_path + "assets/credentials.json"
 db_path = absolute_path + "assets/database.db"
 website_path = absolute_path + "../website/"
-
-print(sos_path)
 
 
 with open(credentials_path) as f:
@@ -219,4 +221,4 @@ async def init_app() -> web.Application:
 
 
 if __name__ == "__main__":
-    web.run_app(init_app(), port=8000)
+    web.run_app(init_app(), port=port)
