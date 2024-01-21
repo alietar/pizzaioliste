@@ -50,7 +50,7 @@ async function displaySOS() {
     sosSelect = document.getElementById('sos');
 
     for (const [idx, name] of Object.entries(availableSOS)) {
-      sosSelect.innerHTML += '<option value="' + toString(idx) + '">' + name + '</option>';;
+      sosSelect.innerHTML += '<option value="' + idx.toString() + '">' + name + '</option>';
     }
   }
 }

@@ -84,7 +84,13 @@ async def print_incoming_request(request, handler):
 @routes.get("/api/student")
 async def available_sos(request):
     print("Sending the list of available SOS")
-    return await respond(request, content=sos)
+
+    sos_list = {}
+
+    for idx, value in sos.items():
+        sos_list[int(idx)] = value["name"]
+
+    return await respond(request, content=sos_list)
 
 
 ### Get a list of the asked SOS from the students
@@ -148,7 +154,7 @@ async def add_sos(request):
             content["lname"], # last name
             content["email"], # email
             int(content["sos"]), # sos id
-            list(sos.keys())[int(content["sos"])], # sos name
+            sos[content["sos"]]["name"], # sos name
             content["timeslot"], # timeslot
             content["bat"], # bat
             int(content["nb"]), # turne
@@ -165,6 +171,8 @@ async def add_sos(request):
 
         # Adding sos request to the database
         await db.add_sos(form)
+
+        print("Added SOS to the database")
 
         # Send message on discord
         #request.config_dict["Queue"].put_nowait(form)
