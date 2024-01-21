@@ -2,26 +2,22 @@ tableHeaders = document.querySelector('thead tr');
 tableBody = document.querySelector('tbody');
 
 
-function gatherSOS() {
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", "http://127.0.0.1:8100/");
-  xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
-  xhr.setRequestHeader("Credential", "pwd");
+async function gatherSOS() {
+  const response = await fetch("/api/admin", {
+    method: "GET",
+    headers: {
+      "Credential": "pwd"
+    },
+  });
+  
+  if (!response.ok) {
+    alert('Erreur')
+    return
+  }
 
-  xhr.onload = () => {
-    console.log(xhr.status);
-    if (xhr.status == 200) {
-      json = JSON.parse(xhr.responseText);
-
-      console.log(json);
-
-      displayTable(json);
-    } else {
-      alert('Erreur : ' + JSON.parse(xhr.responseText)['error'])
-    }
-  };
-
-  xhr.send();
+  const SOS = await response.json();
+      
+  displayTable(SOS);
 }
 
 

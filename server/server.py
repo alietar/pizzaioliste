@@ -108,7 +108,7 @@ async def asked_sos(request):
         db = request.config_dict["DB"]
         sos_list = await db.get_all_sos()
 
-        response_content = {"format": ["id", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "Fait 0Non, 1Oui"], "sos": sos_list}
+        response_content = {"format": ["ID", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "Etat"], "sos": sos_list}
 
     return await respond(request, content=response_content, status=status)
 
