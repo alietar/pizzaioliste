@@ -15,7 +15,7 @@ class DataBase:
         await self.db.close()
 
 
-    async def execute(self, sql: str, parameters: tuple = None, fetchone=False, fetchall=False, commit=True):
+    async def execute(self, sql: str, parameters: tuple = None, fetchone=False, fetchall=False, commit=True, get_id=False):
         if not parameters:
             parameters = ()
 
@@ -30,6 +30,8 @@ class DataBase:
             data = await cursor.fetchone()
         if fetchall:
             data = await cursor.fetchall()
+        if get_id:
+            data = cursor.lastrowid
 
         await cursor.close()
 
@@ -49,7 +51,7 @@ class DataBase:
                 timeslot DATETIME,
                 bat TEXT,
                 turne INTEGER,
-                done BOOLEAN
+                status TEXT
             )
         """
 
@@ -68,10 +70,10 @@ class DataBase:
                 timeslot,
                 bat,
                 turne,
-                done
+                status
             ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
 
-        await self.execute(sql=sql, parameters=data)
+        return await self.execute(sql=sql, parameters=data, get_id=True)
 
 
     async def get_all_sos(self):
@@ -101,3 +103,13 @@ class DataBase:
             return True
         else:
             return False
+
+    async def modify_loop(self, queue):
+        while True:
+            command = await queue.get()
+
+            sql = "UPDATE orders SET status = ? WHERE id = ?"
+
+            await self.execute(sql=sql, parameters=(command["command"], str(command["id"]), ))
+
+            queue.task_done()

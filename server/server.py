@@ -158,7 +158,7 @@ async def add_sos(request):
             content["timeslot"], # timeslot
             content["bat"], # bat
             int(content["nb"]), # turne
-            False # is the sos done
+            "pending" # is the sos done
         ]
 
 
@@ -170,12 +170,14 @@ async def add_sos(request):
             raise Exception("Two SOS are already ordered for this day")
 
         # Adding sos request to the database
-        await db.add_sos(form)
+        _id = await db.add_sos(form)
+
+        form.append(_id)
 
         print("Added SOS to the database")
 
         # Send message on discord
-        #request.config_dict["Queue"].put_nowait(form)
+        request.config_dict["Send_Queue"].put_nowait(form)
 
 
     except Exception as e:
@@ -189,7 +191,6 @@ async def add_sos(request):
     return await respond(request, content=response_content, status=status)
 
 
-
 async def init_db(app: web.Application) -> AsyncIterator[None]:
     db = DataBase(path_to_db=db_path)
     await db.connect()
@@ -199,16 +200,17 @@ async def init_db(app: web.Application) -> AsyncIterator[None]:
 
 
 async def init_bot(app: web.Application) -> AsyncIterator[None]:
-    queue = asyncio.Queue()
-    app["Queue"] = queue
+    app["Send_Queue"] = asyncio.Queue()
+    app["Modify_Queue"] = asyncio.Queue()
 
-    #bot = discordBot.Bot(queue)
-    #task = asyncio.create_task(bot.start(discord_token))
-
+    bot = discordBot.Bot(app["Send_Queue"], app["Modify_Queue"])
+    task1 = asyncio.create_task(bot.start(discord_token))
+    task2 = asyncio.create_task(app["DB"].modify_loop(app["Modify_Queue"]))
 
     yield
 
-    #task.cancel()
+    task1.cancel()
+    task2.cancel()
 
 
 async def root_handler(request):

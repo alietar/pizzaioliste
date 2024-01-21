@@ -6,10 +6,11 @@ channel_id = 1184475986419519591
 
 
 class Bot(commands.Bot):
-    def __init__(self, queue):
+    def __init__(self, send_queue, modify_queue):
         intents = discord.Intents.default()
         intents.message_content = True
-        self.queue = queue
+        self.send_queue = send_queue
+        self.modify_queue = modify_queue
 
         super().__init__(command_prefix=commands.when_mentioned_or('$'), intents=intents)
 
@@ -25,12 +26,12 @@ class Bot(commands.Bot):
         await self.wait_until_ready()
 
         while not self.is_closed():
-            sos = await self.queue.get()
+            sos = await self.send_queue.get()
             print("Sending sos to the discord")
 
-            #await self.send_sos(sos)
+            await self.send_sos(sos)
 
-            self.queue.task_done()
+            self.send_queue.task_done()
 
     async def on_message(self, message):
         # we do not want the bot to reply to itself
@@ -54,11 +55,18 @@ class Bot(commands.Bot):
 
         #embed.set_author("Leonardo@insa-lyon.fr")
 
-        await channel.send('Nouvelle commande de SOS', view=SOSView(), embed=embed)
+        #await channel.send('Nouvelle commande de SOS', view=SOSView(_sos[10], self.modify_queue), embed=embed)
+        self.modify_queue.put_nowait({"id": _sos[10], "command": "done"})
 
 
 
 class SOSView(discord.ui.View): # Create a class called MyView that subclasses discord.ui.View
+    def __init__(self, sos_id, modify_queue):
+        super().__init__()
+        self.sos_id = sos_id
+        self.modify_queue = modify_queue
+
+
     @discord.ui.button(label="Je m'en charge", style=discord.ButtonStyle.primary)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message(f'Le SOS a été pris par ${interaction.user.display_name}')
@@ -68,7 +76,7 @@ class SOSView(discord.ui.View): # Create a class called MyView that subclasses d
         if dm_channel == None:
             dm_channel = await interaction.user.create_dm()
 
-        await dm_channel.send("Suivi du SOS n°231", view=DoneView())
+        await dm_channel.send(f"Suivi du SOS n°{str(self.sos_id)}", view=DoneView(self.sos_id, self.modify_queue))
 
         self.stop()
 
@@ -81,9 +89,16 @@ class SOSView(discord.ui.View): # Create a class called MyView that subclasses d
 
 
 class DoneView(discord.ui.View):
+    def __init__(self, sos_id, modify_queue):
+        super().__init__()
+        self.sos_id = sos_id
+        self.modify_queue = modify_queue
+
+
     @discord.ui.button(label="J'ai fais le SOS", style=discord.ButtonStyle.success)
     async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
         #Prendre en compte dans la database
+        self.modify_queue.put_nowait({"id": self.sos_id, "command": "done"})
 
         await interaction.response.send_message("Réponse prise en compte")
 
@@ -93,6 +108,7 @@ class DoneView(discord.ui.View):
     @discord.ui.button(label="J'ai pas pu faire le SOS", style=discord.ButtonStyle.danger)
     async def not_done(self, interaction: discord.Interaction, button: discord.ui.Button):
         #Prendre en compte dans la database
+        self.modify_queue.put_nowait({"id": self.sos_id, "command": "abandoned"})
 
         await interaction.response.send_message("Réponse prise en compte")
 
