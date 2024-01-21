@@ -55,8 +55,7 @@ class Bot(commands.Bot):
 
         #embed.set_author("Leonardo@insa-lyon.fr")
 
-        #await channel.send('Nouvelle commande de SOS', view=SOSView(_sos[10], self.modify_queue), embed=embed)
-        self.modify_queue.put_nowait({"id": _sos[10], "command": "done"})
+        await channel.send('Nouvelle commande de SOS', view=SOSView(_sos[10], self.modify_queue), embed=embed)
 
 
 
@@ -69,7 +68,7 @@ class SOSView(discord.ui.View): # Create a class called MyView that subclasses d
 
     @discord.ui.button(label="Je m'en charge", style=discord.ButtonStyle.primary)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(f'Le SOS a été pris par ${interaction.user.display_name}')
+        await interaction.response.send_message(f'SOS n°{str(self.sos_id)} pris par ${interaction.user.display_name}')
 
         dm_channel = interaction.user.dm_channel
 
@@ -78,11 +77,18 @@ class SOSView(discord.ui.View): # Create a class called MyView that subclasses d
 
         await dm_channel.send(f"Suivi du SOS n°{str(self.sos_id)}", view=DoneView(self.sos_id, self.modify_queue))
 
+        await interaction.message.delete()
+
         self.stop()
+
 
     @discord.ui.button(label="Supprimer le SOS", style=discord.ButtonStyle.danger)
     async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(f'SOS annulé par ${interaction.user.display_name}')
+        await interaction.response.send_message(f"SOS n°{str(self.sos_id)} annulé par ${interaction.user.display_name}")
+
+        self.modify_queue.put_nowait({"id": self.sos_id, "command": "removed"})
+
+        await interaction.message.delete()
 
         self.stop()
 
