@@ -33,10 +33,33 @@ function displayTable(content) {
   
   sos.forEach((row) => {
     rowElement = document.createElement('tr');
-
-    row.forEach((text) => {
+    
+    row.forEach((text, i) => {
       cell = document.createElement("td");
-      cell.innerHTML = text;
+      
+      if (i === 1) {
+        date = new Date(text);
+
+        day = date.getDate();
+        month = date.getMonth() + 1;
+        hour = date.getHours();
+        minute = date.getMinutes();
+
+        cell.innerHTML = day + '/' + month + ' ' + hour + 'h' + minute;
+      } else if (i === 7) {
+        date = new Date(text);
+
+        day = date.getDay();
+        dayName = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][day];
+        hour = date.getHours();
+        minute = date.getMinutes();
+
+        cell.innerHTML = dayName + ' ' + hour + 'h' + minute;
+
+      } else {
+        cell.innerHTML = text;
+      }
+
       rowElement.appendChild(cell);
     });
 

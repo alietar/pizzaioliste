@@ -1,18 +1,17 @@
 html, body {
    margin: 0;
-   scroll-padding-top: 8rem;
-   font-size: 40px;
 
    --green: #076A67;
    --red: #FB7552;
    --bg: #011213;
 }
 
-* {
-   font-size: 16px;
-}
-
-p, button, a, h1, h2, td, th {
+*,
+*::before,
+*::after {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
    font-family: "sans-serif";
 }
 
@@ -23,11 +22,6 @@ a {
 
 p {
    margin: 0;
-}
-
-
-main {
-   margin-top: 8em;
 }
 
 header {
@@ -43,17 +37,28 @@ header {
    color: white;
 }
 
-header img {
-   height: 5em;
-}
-
 
 table {
   border-collapse: collapse;
+
+  width: 100%;
+}
+
+thead {
+   background-color: var(--red);
+   color: white;
+}
+
+tbody tr {
+   border: 1px solid #ddd;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #f4f4f4;
 }
 
 td, th {
-  border: 1px solid #999;
-  padding: 0.5rem;
+  #border: 1px solid #999;
+  padding: 1rem;
   text-align: left;
 }
