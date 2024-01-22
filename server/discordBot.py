@@ -55,13 +55,13 @@ class Bot(commands.Bot):
 
         #embed.set_author("Leonardo@insa-lyon.fr")
 
-        await channel.send('Nouvelle commande de SOS', view=SOSView(_sos[10], self.modify_queue, timeout=None), embed=embed)
+        await channel.send('Nouvelle commande de SOS', view=SOSView(_sos[10], self.modify_queue), embed=embed)
 
 
 
 class SOSView(discord.ui.View): # Create a class called MyView that subclasses discord.ui.View
     def __init__(self, sos_id, modify_queue):
-        super().__init__()
+        super().__init__(timeout=None)
         self.sos_id = sos_id
         self.modify_queue = modify_queue
 
@@ -75,7 +75,7 @@ class SOSView(discord.ui.View): # Create a class called MyView that subclasses d
         if dm_channel == None:
             dm_channel = await interaction.user.create_dm()
 
-        await dm_channel.send(f"Suivi du SOS n°{str(self.sos_id)}", view=DoneView(self.sos_id, self.modify_queue, timeout=None))
+        await dm_channel.send(f"Suivi du SOS n°{str(self.sos_id)}", view=DoneView(self.sos_id, self.modify_queue))
 
         await interaction.message.delete()
 
@@ -96,7 +96,7 @@ class SOSView(discord.ui.View): # Create a class called MyView that subclasses d
 
 class DoneView(discord.ui.View):
     def __init__(self, sos_id, modify_queue):
-        super().__init__()
+        super().__init__(timeout=None)
         self.sos_id = sos_id
         self.modify_queue = modify_queue
 

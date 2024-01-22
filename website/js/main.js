@@ -48,9 +48,11 @@ async function displaySOS() {
     console.log(availableSOS)
 
     sosSelect = document.getElementById('sos');
+    sosList = document.querySelector('ul');
 
-    for (const [idx, name] of Object.entries(availableSOS)) {
-      sosSelect.innerHTML += '<option value="' + idx.toString() + '">' + name + '</option>';
+    for (const [idx, _sos] of Object.entries(availableSOS)) {
+      sosSelect.innerHTML += '<option value="' + idx.toString() + '">' + _sos['name'] + '</option>';
+      sosList.innerHTML += '<li><b>' + _sos['name'] + '</b> : ' + _sos['description'] +'</li>';
     }
   }
 }

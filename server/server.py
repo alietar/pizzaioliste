@@ -76,9 +76,6 @@ async def print_incoming_request(request, handler):
 
 
 
-##### Add middle man to print incoming requests
-
-
 ### Get a list of the available SOS
 
 @routes.get("/api/student")
@@ -87,10 +84,7 @@ async def available_sos(request):
 
     sos_list = {}
 
-    for idx, value in sos.items():
-        sos_list[int(idx)] = value["name"]
-
-    return await respond(request, content=sos_list)
+    return await respond(request, content=sos)
 
 
 ### Get a list of the asked SOS from the students
