@@ -1,4 +1,4 @@
-main = document.querySelector('main');
+/*main = document.querySelector('main');
 
 function lerp(x, y, a) {
   return x * (1 - a) + y * a;
@@ -29,7 +29,18 @@ function scrollFunction() {
     div.classList.remove('_scrolled1')
     div.classList.remove('_scrolled2')
   }
-} 
+} */
+
+document.getElementById('menu-btn').addEventListener("click", async function(event) {
+  document.querySelector('header').classList.add('_extended');
+});
+
+
+document.querySelectorAll('header div a').forEach((button) => {
+  button.addEventListener("click", async function(event) {
+    document.querySelector('header').classList.remove('_extended');
+  });
+});
 
 
 
