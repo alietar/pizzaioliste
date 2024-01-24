@@ -127,20 +127,18 @@ async def add_sos(request):
     # Try to get informations from the form, if it fails then the data is incorrect
     try:
         if content["confirmation"] != "y":
-            raise Exception("Conditions aren't accepted")
+            raise Exception("Veuillez accepter les conditions")
 
         if not (content["bat"] in "ABCDE"):
-            raise Exception("Bat is not A, B, C, D or E")
+            raise Exception("Le Bat n'est pas A, B, C, D or E")
 
         if not content['nb'].isdecimal():
-            raise Exception("Turne is not a valid integer")
+            raise Exception("Le n°turne n'est pas un entier valide")
 
         if not content["sos"].isdecimal() and int(content["sos"]) >= len(sos):
-            raise Exception("SOS is not a valid integer")
+            raise Exception("Le SOS choisi n'est pas valide")
 
         # Implement email verification
-
-        print('Form is valid')
 
         form = [
             str(datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")), # order_date
@@ -161,7 +159,7 @@ async def add_sos(request):
         has_reached_limit = await db.check_user_limit(form[3], asked_day) # form[3] is the email from the form
 
         if has_reached_limit:
-            raise Exception("Two SOS are already ordered for this day")
+            raise Exception("Tu as déjà commandé 2 SOS pour ce jour là")
 
         # Adding sos request to the database
         _id = await db.add_sos(form)

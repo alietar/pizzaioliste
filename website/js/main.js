@@ -1,36 +1,3 @@
-/*main = document.querySelector('main');
-
-function lerp(x, y, a) {
-  return x * (1 - a) + y * a;
-}
-
-
-let div = document.querySelector('header');
-let img = div.querySelector('img');
-let h1 = div.querySelector('h1');
-
-let width = window.innerWidth;
-let height = window.innerHeight;
-
-window.addEventListener('resize', scrollFunction, true);
-window.addEventListener('scroll', scrollFunction, true);
-window.addEventListener('load', scrollFunction, true);
-
-function scrollFunction() {
-  let coef = window.scrollY / window.innerHeight;
-
-  if (coef > 0.8 && coef < 2) {
-    div.classList.add('_scrolled1')
-    div.classList.remove('_scrolled2')
-  } else if (coef > 2) {
-    div.classList.remove('_scrolled1')
-    div.classList.add('_scrolled2')
-  } else if (coef <= 0.8) {
-    div.classList.remove('_scrolled1')
-    div.classList.remove('_scrolled2')
-  }
-} */
-
 document.getElementById('menu-btn').addEventListener("click", async function(event) {
   document.querySelector('header').classList.add('_extended');
 });
@@ -44,24 +11,36 @@ document.querySelectorAll('header div a').forEach((button) => {
 
 
 
+function showAlert(title, description) {
+  element = `<div id="error-container"><h2>${title}</h2><p>${description}</p><button>OK</button></div>`;
+
+  document.body.insertAdjacentHTML('beforeend', element);
+
+  main = document.querySelector('main')
+  main.classList.add('_blurred');
+
+  document.querySelector('#error-container button').addEventListener("click", () => {
+    main.classList.remove('_blurred');
+    document.querySelector('#error-container').remove();
+  });
+}
+
+
+
 async function displaySOS() {
   const response = await fetch("/api/student", {
     method: "GET"
   });
 
-  const availableSOS = await response.json();
-    
-  console.log("Success:", availableSOS);
+  const responseContent = await response.json();
       
   if (!response.ok) {
-    alert('Erreur')
+    showAlert('Erreur', responseContent.error);
   } else {
-    console.log(availableSOS)
-
     sosSelect = document.getElementById('sos');
     sosList = document.querySelector('ul');
 
-    for (const [idx, _sos] of Object.entries(availableSOS)) {
+    for (const [idx, _sos] of Object.entries(responseContent)) {
       sosSelect.innerHTML += '<option value="' + idx.toString() + '">' + _sos['name'] + '</option>';
       sosList.innerHTML += '<li><b>' + _sos['name'] + '</b> : ' + _sos['description'] +'</li>';
     }
@@ -72,19 +51,20 @@ displaySOS()
 
 
 
-document.getElementById("submit").addEventListener("click", async function(event){
+document.querySelector('form').addEventListener('submit', async function(event){
   event.preventDefault()
 
-  let formData = new FormData(document.querySelector('form'));
+  form = document.querySelector('form')
 
-  for (const [key, value] of formData) {
-    console.log(`${key}: ${value}\n`);
-  }
+  isValid = form.checkValidity();
+  form.reportValidity();
 
+  if (!isValid) return;
+
+  let formData = new FormData(form);
 
   var object = {};
   formData.forEach((value, key) => {
-      // Reflect.has in favor of: object.hasOwnProperty(key)
       if(!Reflect.has(object, key)){
           object[key] = value;
           return;
@@ -104,11 +84,13 @@ document.getElementById("submit").addEventListener("click", async function(event
     body: JSON.stringify(object),
   });
 
-  const result = await response.json();
-  
-  console.log("Success:", result);
-    
+  const responseContent = await response.json();
+
   if (!response.ok) {
-    alert('Erreur')
+    showAlert('Erreur', responseContent.error);
+  } else {
+    showAlert('🤌', 'SOS commandé !');
+
+    form.reset();
   }
 });

@@ -27,6 +27,7 @@ header {
    position: fixed;
    top: 0;
    background-color: var(--red);
+   z-index: 2;
 
    transition: all 1s;
 
@@ -256,4 +257,43 @@ input[type=text], input[type=email], input=[type=number] {
 
 li {
    margin-bottom: 0.5rem;
+}
+
+
+#error-container {
+   display: flex;
+   align-items: center;
+   width: 50%;
+   position: fixed;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   
+   background-color: #f4f4f4;
+
+   flex-direction: column;
+   gap: 0.5rem;
+   padding: 1rem;
+
+}
+
+#error-container p {
+   text-align: center;
+}
+
+#error-container button {
+   width: 100%;
+   border: none;
+   background-color: var(--red);
+   color: white;
+   font-size: 1.2rem;
+   height: 2rem;
+}
+
+._blurred {
+   filter: blur(10px);
+}
+
+._blurred * {
+   pointer-events: none;
 }
