@@ -29,10 +29,12 @@ website_path = absolute_path + "../website/"
 
 
 with open(credentials_path) as f:
-    _file_content = json.load(f)
-    credential = _file_content["admin_password"]
-    webhook_url = _file_content["discord_webhook_url"]
-    discord_token = _file_content["discord_token"]
+    _content = json.load(f)
+
+    credential = _content["admin_password"]
+    webhook_url = _content["discord_webhook_url"]
+    discord_token = _content["discord_token"]
+    channels_id = _content["channels_id"]
 
 with open(sos_path) as f:
     sos = json.load(f)
@@ -195,7 +197,7 @@ async def init_bot(app: web.Application) -> AsyncIterator[None]:
     app["Send_Queue"] = asyncio.Queue()
     app["Modify_Queue"] = asyncio.Queue()
 
-    bot = discordBot.Bot(app["Send_Queue"], app["Modify_Queue"])
+    bot = discordBot.Bot(app["Send_Queue"], app["Modify_Queue"], channels_id)
     task1 = asyncio.create_task(bot.start(discord_token))
     task2 = asyncio.create_task(app["DB"].modify_loop(app["Modify_Queue"]))
 
