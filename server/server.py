@@ -142,6 +142,14 @@ async def add_sos(request):
 
         # Implement email verification
 
+        timeslot = f"{content["day"]}:{content["hour"]}"
+
+        if content["day"] == "5" and content["hour"] != "1":
+            raise Exception("Les SOS le vendredi ne sont possible que le matin")
+
+        # day goes from 1 to 5 for monday to friday
+        # hour goes from 1 to 3 for 7-8; 12-14; 18-21;
+
         form = [
             str(datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")), # order_date
             content["fname"], # first name
@@ -149,7 +157,7 @@ async def add_sos(request):
             content["email"], # email
             int(content["sos"]), # sos id
             sos[content["sos"]]["name"], # sos name
-            content["timeslot"], # timeslot
+            timeslot, # timeslot
             content["bat"], # bat
             int(content["nb"]), # turne
             "pending" # is the sos done
