@@ -7,8 +7,8 @@ def convert_timeslot(timeslot):
     dayName = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][int(timeslot[0])];
     hourName = ["7h-8h", "12h-14h", "18h-21h"][int(timeslot[2])];
 
-    return dayName + " " + hourName
-
+    #return dayName + " " + hourName
+    return timeslot
 
 class Bot(commands.Bot):
     def __init__(self, send_queue, modify_queue, channels_id, db):
