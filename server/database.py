@@ -48,7 +48,7 @@ class DataBase:
                 email TEXT,
                 sos INTEGER,
                 sos_name TEXT,
-                timeslot DATETIME,
+                timeslot TEXT,
                 bat TEXT,
                 turne INTEGER,
                 status TEXT
@@ -84,7 +84,6 @@ class DataBase:
         return await self.execute(sql=sql, fetchall=True, commit=False)
 
 
-
     async def check_user_limit(self, email: str, asked_day):
         """
             Check user's daily limit of SOSs, which is 2, based on his email
@@ -96,13 +95,27 @@ class DataBase:
         days = []
 
         for row in rows:
-            date_timeslot = datetime.datetime.strptime(row[0], '%Y-%m-%dT%H:%M')
-            days.append(date_timeslot.weekday())
+            #date_timeslot = datetime.datetime.strptime(row[0], '%Y-%m-%dT%H:%M')
+            #days.append(date_timeslot.weekday())
+            days.append(row[0][0])
 
         if days.count(asked_day) >= 2:
             return True
         else:
             return False
+
+
+    async def get_status(self, _id):
+        sql = "SELECT status FROM orders WHERE id = ?"
+
+        return await self.execute(sql=sql, parameters=(_id, ), commit=False, fetchone=True)
+
+
+    async def set_status(self, _id, _status):
+        sql = "UPDATE orders SET status = ? WHERE id = ?"
+
+        await self.execute(sql=sql, parameters=(_status, str(_id), ))
+
 
     async def modify_loop(self, queue):
         while True:

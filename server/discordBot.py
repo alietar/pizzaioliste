@@ -14,15 +14,15 @@ def generate_embed(_sos):
     return embed
 
 
+def convert_timeslot(timeslot):
+    dayName = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][int(timeslot[0])];
+    hourName = ["7h-8h", "12h-14h", "18h-21h"][int(timeslot[2])];
 
-
-@commands.command()
-async def test(ctx, arg):
-    await ctx.send(arg)
+    return dayName + " " + hourName
 
 
 class Bot(commands.Bot):
-    def __init__(self, send_queue, modify_queue, channels_id):
+    def __init__(self, send_queue, modify_queue, channels_id, db):
         intents = discord.Intents.default()
         intents.message_content = True
 
@@ -31,8 +31,7 @@ class Bot(commands.Bot):
         self.send_queue = send_queue
         self.modify_queue = modify_queue
         self.channels_id = channels_id
-
-        self.add_command(test)
+        self.db = db
 
 
     async def on_ready(self):
@@ -52,6 +51,7 @@ class Bot(commands.Bot):
             await self.send_sos(sos)
 
             self.send_queue.task_done()
+
 
     async def on_message(self, message):
         # we do not want the bot to reply to itself
@@ -96,7 +96,14 @@ class Bot(commands.Bot):
             else:
                 match command:
                     case "prendre":
-                        print(f"Sos n°{sos_id} fini")
+                        print(f"Sos n°{sos_id} pris")
+
+                        status = self.db.get_status(sos_id)
+                        print(status)
+
+                        if status != "pending":
+                            raise Exception("La commande est déjà prise")
+
 
                     case "supprimer":
                         print(f"Sos n°{sos_id} annulé")
@@ -107,6 +114,7 @@ class Bot(commands.Bot):
 
 
             await message.add_reaction("🤌")
+
 
         except Exception as e:
             # Sending the error message to the client to let him know
@@ -122,7 +130,7 @@ class Bot(commands.Bot):
 
         embed = discord.Embed(
             title = _sos[5],
-            description = f"Pour : {_sos[1]} {_sos[2]}\nAu : {_sos[7]}{str(_sos[8])}\nA : {_sos[6]}",
+            description = f"Pour : {_sos[1]} {_sos[2]}\nAu : {_sos[7]}{str(_sos[8])}\nLe : {convert_timeslot(_sos[6])}",
             color = discord.Colour.blurple()
         )
 
@@ -149,7 +157,7 @@ class SOSView(discord.ui.View): # Create a class called MyView that subclasses d
 
         embed = discord.Embed(
             title = self.sos[5],
-            description = f"Pour : {self.sos[1]} {self.sos[2]}\nAu : {self.sos[7]}{str(self.sos[8])}\nA : {self.sos[6]}",
+            description = f"Pour : {self.sos[1]} {self.sos[2]}\nAu : {self.sos[7]}{str(self.sos[8])}\nA : {convert_timeslot(_sos[6])}",
             color = discord.Colour.blurple()
         )
 

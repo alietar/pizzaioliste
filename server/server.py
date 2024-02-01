@@ -104,7 +104,7 @@ async def asked_sos(request):
         db = request.config_dict["DB"]
         sos_list = await db.get_all_sos()
 
-        response_content = {"format": ["ID", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Horaire", "Bat", "Turne", "État"], "sos": sos_list}
+        response_content = {"format": ["ID", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Créneau", "Bat", "Turne", "État"], "sos": sos_list}
 
     return await respond(request, content=response_content, status=status)
 
@@ -142,7 +142,7 @@ async def add_sos(request):
 
         # Implement email verification
 
-        timeslot = f"{content["day"]}:{content["hour"]}"
+        timeslot = f"{content['day']}:{content['hour']}"
 
         if content["day"] == "5" and content["hour"] != "1":
             raise Exception("Les SOS le vendredi ne sont possible que le matin")
@@ -165,8 +165,7 @@ async def add_sos(request):
 
 
         # Checks if the client didn't already ordered two sos for the same day
-        asked_day = datetime.datetime.strptime(form[6], '%Y-%m-%dT%H:%M').weekday() # form[6] is the timeslot of the ordered sos
-        has_reached_limit = await db.check_user_limit(form[3], asked_day) # form[3] is the email from the form
+        has_reached_limit = await db.check_user_limit(form[3], content['day']) # form[3] is the email from the form
 
         if has_reached_limit:
             raise Exception("Tu as déjà commandé 2 SOS pour ce jour là")
@@ -205,7 +204,7 @@ async def init_bot(app: web.Application) -> AsyncIterator[None]:
     app["Send_Queue"] = asyncio.Queue()
     app["Modify_Queue"] = asyncio.Queue()
 
-    bot = discordBot.Bot(app["Send_Queue"], app["Modify_Queue"], channels_id)
+    bot = discordBot.Bot(app["Send_Queue"], app["Modify_Queue"], channels_id, app["db"])
     task1 = asyncio.create_task(bot.start(discord_token))
     task2 = asyncio.create_task(app["DB"].modify_loop(app["Modify_Queue"]))
 

@@ -47,15 +47,13 @@ function displayTable(content) {
 
         cell.innerHTML = day + '/' + month + ' ' + hour + 'h' + minute;
       } else if (i === 7) {
-        date = new Date(text);
+        day = parseInt(text.charAt(0)) - 1;
+        hour = parseInt(text.charAt(2)) - 1;
 
-        day = date.getDay();
         dayName = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][day];
-        hour = date.getHours();
-        minute = date.getMinutes();
-
-        cell.innerHTML = dayName + ' ' + hour + 'h' + minute;
-
+        hourName = ["7h-8h", "12h-14h", "18h-21h"][hour];
+        
+        cell.innerHTML = dayName + ' ' + hourName;
       } else {
         cell.innerHTML = text;
       }

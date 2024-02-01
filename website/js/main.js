@@ -26,7 +26,6 @@ function showAlert(title, description) {
 }
 
 
-
 async function displaySOS() {
   const response = await fetch("/api/student", {
     method: "GET"
@@ -91,6 +90,8 @@ document.querySelector('form').addEventListener('submit', async function(event){
   } else {
     showAlert('🤌', 'SOS commandé !');
 
-    form.reset();
+    document.getElementById('confirmation').checked = false;
+
+    //form.reset();
   }
 });
