@@ -204,7 +204,7 @@ async def init_bot(app: web.Application) -> AsyncIterator[None]:
     app["Send_Queue"] = asyncio.Queue()
     app["Modify_Queue"] = asyncio.Queue()
 
-    bot = discordBot.Bot(app["Send_Queue"], app["Modify_Queue"], channels_id, app["db"])
+    bot = discordBot.Bot(app["Send_Queue"], app["Modify_Queue"], channels_id, app["DB"])
     task1 = asyncio.create_task(bot.start(discord_token))
     task2 = asyncio.create_task(app["DB"].modify_loop(app["Modify_Queue"]))
 

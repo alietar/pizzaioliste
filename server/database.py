@@ -108,13 +108,29 @@ class DataBase:
     async def get_status(self, _id):
         sql = "SELECT status FROM orders WHERE id = ?"
 
-        return await self.execute(sql=sql, parameters=(_id, ), commit=False, fetchone=True)
+        status = await self.execute(sql=sql, parameters=(_id, ), commit=False, fetchone=True)
 
+        return status[0]
 
     async def set_status(self, _id, _status):
         sql = "UPDATE orders SET status = ? WHERE id = ?"
 
         await self.execute(sql=sql, parameters=(_status, str(_id), ))
+
+
+    async def get_sos(self, _id):
+        sql = "SELECT * FROM orders WHERE id = ?"
+
+        sos_with_id = await self.execute(sql=sql, parameters=(str(_id), ), fetchone=True, commit=False)
+
+        sos = []
+
+        for i in range(1, len(sos_with_id)):
+            sos.append(sos_with_id[i])
+
+        sos.append(sos_with_id[0])
+
+        return sos
 
 
     async def modify_loop(self, queue):

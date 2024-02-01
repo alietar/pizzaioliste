@@ -2,17 +2,6 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks, commands
 
-def generate_embed(_sos):
-    embed = discord.Embed(
-        title = _sos[5],
-        description = f"Pour : {_sos[1]} {_sos[2]}\nAu : {_sos[7]}{str(_sos[8])}\nA : {_sos[6]}",
-        color = discord.Colour.blurple()
-    )
-
-    #embed.set_author("Leonardo@insa-lyon.fr")
-
-    return embed
-
 
 def convert_timeslot(timeslot):
     dayName = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][int(timeslot[0])];
@@ -48,14 +37,21 @@ class Bot(commands.Bot):
             sos = await self.send_queue.get()
             print("Sending sos to the discord")
 
-            await self.send_sos(sos)
+            await self.annouce_sos(sos)
 
             self.send_queue.task_done()
 
 
-    async def on_message(self, message):
+    async def on_message(self, _message):
+        print(f"New message from discord : {_message.content}")
+
+        await self.handle_message(_message, False)
+
+
+    async def handle_message(self, message, confirmed):
         # we do not want the bot to reply to itself
-        print(message.content)
+
+        confirmed = True
 
         if message.author.id == self.user.id:
             return
@@ -72,9 +68,10 @@ class Bot(commands.Bot):
 
             command = args[0][1:]
             sos_id = args[1]
+            status = await self.db.get_status(sos_id)
 
             if not sos_id.isdecimal():
-                raise Exception("La turne n'est pas un numéro")
+                raise Exception("L'agument n'est pas un nombre")
 
             dm_channel = message.author.dm_channel
 
@@ -87,8 +84,30 @@ class Bot(commands.Bot):
                     case "fini" | "finir":
                         print(f"Sos n°{sos_id} fini")
 
+                        match status:
+                            case "done":
+                                raise Exception("Le SOS est déjà fait")
+                            case "abandonned":
+                                raise Exception("Le SOS a été abandonné")
+                            case "pending":
+                                raise Exception("Le SOS n'a pas été pris")
+
+                        if confirmed:
+                            await self.db.set_status(sos_id, 'done')
+
                     case "annule" | "annul" | "annulé" | "annuler" | "anule" | "anul" | "anulé" | "anuler":
                         print(f"Sos n°{sos_id} annulé")
+
+                        match status:
+                            case "done":
+                                raise Exception("Le SOS est déjà fait")
+                            case "abandonned":
+                                raise Exception("Le SOS est déjà abandonné")
+                            case "pending":
+                                raise Exception("Le SOS n'a pas été pris")
+
+                        if confirmed:
+                            await self.db.set_status(sos_id, 'abandonned')
 
                     case _:
                         raise Exception("La commande n'est pas reconnue\nLes commandes possibles sont 'annuler' et 'finir'")
@@ -98,119 +117,58 @@ class Bot(commands.Bot):
                     case "prendre":
                         print(f"Sos n°{sos_id} pris")
 
-                        status = self.db.get_status(sos_id)
-                        print(status)
-
                         if status != "pending":
-                            raise Exception("La commande est déjà prise")
+                            raise Exception("Le SOS est déjà pris")
 
+                        if confirmed:
+                            await self.db.set_status(sos_id, 'taken')
+
+                            sos = await self.db.get_sos(sos_id)
+
+                            await self.send_sos(sos, dm_channel)
 
                     case "supprimer":
                         print(f"Sos n°{sos_id} annulé")
 
+                        if status != "pending":
+                            raise Exception("Le SOS est déjà pris")
+
+                        if confirmed:
+                            await self.db.set_status(sos_id, 'cancelled')
+
                     case _:
                         raise Exception("La commande n'est pas reconnue\nLes commandes possibles sont 'prendre' et 'supprimer'")
 
-
-
-            await message.add_reaction("🤌")
-
+            if confirmed:
+                await message.add_reaction("🤌")
+            else:
+                await self.ask_confirmation(message)
 
         except Exception as e:
             # Sending the error message to the client to let him know
-            await message.channel.send(str(e))
+            await message.reply(str(e), silent=True, delete_after=10)
 
 
+    async def on_reaction_add(self, _reaction, _user):
+        print(_reaction.emoji)
+        if _reaction.emoji == "🍕":
+            await self.handle_message(_reaction.message, True)
 
-    async def send_sos(self, _sos):
-        print(_sos[7])
-        print(self.channels_id[_sos[7]])
+
+    async def annouce_sos(self, _sos):
         channel = self.get_channel(int(self.channels_id[_sos[7]]))
+        await self.send_sos(_sos, channel)
 
 
+    async def ask_confirmation(self, _message):
+        await _message.reply(f"Confirme l'action en réagissant avec 🍕 à ton propre message", silent=True, delete_after=10)
+
+
+    async def send_sos(self, _sos, _channel):
         embed = discord.Embed(
             title = _sos[5],
             description = f"Pour : {_sos[1]} {_sos[2]}\nAu : {_sos[7]}{str(_sos[8])}\nLe : {convert_timeslot(_sos[6])}",
             color = discord.Colour.blurple()
         )
 
-        await channel.send('Nouvelle commande de SOS', view=SOSView(_sos, self.modify_queue), embed=embed)
-
-
-
-class SOSView(discord.ui.View): # Create a class called MyView that subclasses discord.ui.View
-    def __init__(self, _sos, _modify_queue):
-        super().__init__(timeout=None)
-        self.sos = _sos
-        self.sos_id = self.sos[10]
-        self.modify_queue = _modify_queue
-
-
-    @discord.ui.button(label="Je m'en charge", style=discord.ButtonStyle.primary)
-    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(f'SOS n°{str(self.sos_id)} pris par ${interaction.user.display_name}')
-
-        dm_channel = interaction.user.dm_channel
-
-        if dm_channel == None:
-            dm_channel = await interaction.user.create_dm()
-
-        embed = discord.Embed(
-            title = self.sos[5],
-            description = f"Pour : {self.sos[1]} {self.sos[2]}\nAu : {self.sos[7]}{str(self.sos[8])}\nA : {convert_timeslot(_sos[6])}",
-            color = discord.Colour.blurple()
-        )
-
-        await dm_channel.send(f"Tu t'occupes du SOS n°{str(self.sos_id)}", view=DoneView(self.sos_id, self.modify_queue), embed=embed)
-        await interaction.message.delete()
-
-        self.stop()
-
-
-    @discord.ui.button(label="Supprimer le SOS", style=discord.ButtonStyle.danger)
-    async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message(f"SOS n°{str(self.sos_id)} annulé par ${interaction.user.display_name}")
-
-        self.modify_queue.put_nowait({"id": self.sos_id, "command": "removed"})
-
-        await interaction.message.delete()
-
-        self.stop()
-
-
-
-class DoneView(discord.ui.View):
-    def __init__(self, _sos_id, _modify_queue):
-        super().__init__(timeout=None)
-        self.sos_id = _sos_id
-        self.modify_queue = _modify_queue
-
-
-    @discord.ui.button(label="J'ai fais le SOS", style=discord.ButtonStyle.success)
-    async def done(self, interaction: discord.Interaction, button: discord.ui.Button):
-        #Prendre en compte dans la database
-        self.modify_queue.put_nowait({"id": self.sos_id, "command": "done"})
-
-        await interaction.response.send_message("Réponse prise en compte")
-
-        self.stop()
-
-
-    @discord.ui.button(label="J'ai pas pu faire le SOS", style=discord.ButtonStyle.danger)
-    async def not_done(self, interaction: discord.Interaction, button: discord.ui.Button):
-        #Prendre en compte dans la database
-        self.modify_queue.put_nowait({"id": self.sos_id, "command": "abandoned"})
-
-        await interaction.response.send_message("Réponse prise en compte")
-
-        self.stop()
-
-
-
-#@bot.command()
-#async def button(ctx):
-#    view = MyView()
-#
-#    await ctx.send('Do you want to continue?', view=view)
-#    await view.wait()
-#    print(view.value)
+        await _channel.send(f"Nouvelle commande de SOS n°{str(_sos[10])}", embed=embed)
