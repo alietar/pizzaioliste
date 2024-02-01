@@ -49,15 +49,23 @@
                <select id="sos" name="sos">
                </select>
             </div>
-            <div style="grid-area: timeslot">
-               <label for="timeslot">Horaire : 7-8h/12-14h/18-21h, vendredi 7-8h</label>
-               <input
-              type="datetime-local"
-              id="timeslot"
-              name="timeslot"
-              value="2024-02-19T07:00"
-              min="2024-02-19T07:00"
-              max="2024-02-23T08:00" />
+            <div style="grid-area: day">
+               <label for="day">Jour</label>
+               <select id="day" name="day">
+                  <option value="1">Lundi</option>
+                  <option value="2">Mardi</option>
+                  <option value="3">Mercredi</option>
+                  <option value="4">Jeudi</option>
+                  <option value="5">Vendredi</option>
+               </select>
+            </div>
+            <div style="grid-area: hour">
+               <label for="hour">Créneau</label>
+               <select id="hour" name="hour">
+                  <option value="1">7h-8h</option>
+                  <option value="2">12h-14h</option>
+                  <option value="3">18h-21h</option>
+               </select>
             </div>
             <div style="grid-area: email;">
                <label for="email">Email de l'INSA</label>
@@ -114,7 +122,6 @@
                <span>Thomas</span>
             </div>
          </div>
-
          <h1 id="reseaux">Réseaux</h1>
          <div id="reseaux-container">
             <a href="https://instagram.com"><img src="img/instagram.svg" height="24px"/></a>

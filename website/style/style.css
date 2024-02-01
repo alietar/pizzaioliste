@@ -212,8 +212,8 @@ form {
    grid-template-areas:
       "fname lname"
       "bat nb"
+      "day hour"
       "sos sos"
-      "timeslot timeslot"
       "email email"
       "condition condition"
       "send send";
