@@ -4,11 +4,10 @@ from discord.ext import tasks, commands
 
 
 def convert_timeslot(timeslot):
-    dayName = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][int(timeslot[0])];
-    hourName = ["7h-8h", "12h-14h", "18h-21h"][int(timeslot[2])];
+    dayName = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"][int(timeslot[0]) - 1];
+    hourName = ["7h-8h", "12h-14h", "18h-21h"][int(timeslot[2]) - 1];
 
-    #return dayName + " " + hourName
-    return timeslot
+    return dayName + " " + hourName
 
 class Bot(commands.Bot):
     def __init__(self, send_queue, modify_queue, channels_id, db):
