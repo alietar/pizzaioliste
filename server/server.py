@@ -71,7 +71,7 @@ routes = web.RouteTableDef()
 
 @web.middleware
 async def print_incoming_request(request, handler):
-    print(f"Incoming {request.method} request -> {request.rel_url}")
+    #print(f"Incoming {request.method} request -> {request.rel_url}")
 
     return await handler(request)
 
