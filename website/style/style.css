@@ -215,6 +215,7 @@ form {
       "day hour"
       "sos sos"
       "email email"
+      "comment comment"
       "condition condition"
       "send send";
 }
@@ -243,8 +244,8 @@ input[type=text], input[type=email], input=[type=number] {
 }
 
 #confirmation-container input {
-   height: 1rem;
-   width: 1rem;
+   height: 2rem;
+   width: 2rem;
 }
 
 #submit {

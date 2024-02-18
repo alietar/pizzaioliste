@@ -18,6 +18,55 @@
            </tbody>
          </table>
       </main>
+      <form id="filter-container" autocomplete="off" class="_hidden">
+         <div style="grid-area: day">
+            <label for="day">Jour</label>
+            <select id="day" name="day">
+               <option value="0">Peu importe</option>
+               <option value="1">Lundi</option>
+               <option value="2">Mardi</option>
+               <option value="3">Mercredi</option>
+               <option value="4">Jeudi</option>
+               <option value="5">Vendredi</option>
+            </select>
+         </div>
+         <div style="grid-area: hour">
+            <label for="hour">Créneau</label>
+            <select id="hour" name="hour">
+               <option value="0">Peu importe</option>
+               <option value="1">7h-8h</option>
+               <option value="2">12h-14h</option>
+               <option value="3">18h-21h</option>
+            </select>
+         </div>
+         <div style="grid-area: bat;">
+            <label for="bat">Bat</label>
+            <select id="bat" name="bat">
+               <option value="0">Peu importe</option>
+               <option value="A">A</option>
+               <option value="B">B</option>
+               <option value="C">C</option>
+               <option value="D">D</option>
+               <option value="E">E</option>
+            </select>
+         </div>
+         <div style="grid-area: floor;">
+            <label for="floor">Etage</label>
+            <select id="floor" name="floor">
+               <option value="0">Peu importe</option>
+               <option value="1">1</option>
+               <option value="2">2</option>
+               <option value="3">3</option>
+               <option value="4">4</option>
+               <option value="5">5</option>
+               <option value="6">6</option>
+               <option value="7">7</option>
+            </select>
+         </div>
+         <div style="grid-area: refresh;">
+            <input id="refresh" type="submit" value="Actualiser" />
+         </div>
+      </form>
       <script type="text/javascript" src="js/admin.js"></script>
    </body>
 </html>
