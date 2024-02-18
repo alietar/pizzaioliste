@@ -155,7 +155,17 @@ class Bot(commands.Bot):
 
 
     async def annouce_sos(self, _sos):
-        channel = self.get_channel(int(self.channels_id[_sos[7]]))
+        channelName = _sos[7] + str(_sos[8])[0]
+        print(channelName)
+
+        channelId = int(self.channels_id["erreur"])
+        try:
+            channelId = int(self.channels_id[channelName])
+        except:
+            pass
+
+        channel = self.get_channel(channelId)
+
         await self.send_sos(_sos, channel)
 
 
