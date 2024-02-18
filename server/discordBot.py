@@ -149,6 +149,7 @@ class Bot(commands.Bot):
     async def on_reaction_add(self, _reaction, _user):
         #if _reaction.emoji == "🍕":
         #    await self.handle_message(_reaction.message, True)
+        pass
 
 
     async def annouce_sos(self, _sos):

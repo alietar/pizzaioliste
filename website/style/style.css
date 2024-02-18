@@ -3,9 +3,9 @@ html, body {
    scroll-padding-top: 8rem;
    font-size: 40px;
 
-   --green: #076A67;
-   --red: #FB7552;
-   --bg: #011213;
+   --main-light: #e7d3b0;
+   --main-dark: #D95A41;
+   --bg: #2d281f;
 }
 
 p, button, a, h1, h2 {
@@ -26,7 +26,7 @@ header {
    height: 7rem;
    position: fixed;
    top: 0;
-   background-color: var(--red);
+   background-color: var(--main-light);
    z-index: 2;
 
    transition: all 1s;
@@ -79,7 +79,7 @@ header div a {
 
 header div a:hover {
    background-color: white;
-   color: var(--red);
+   color: var(--main-dark);
 }
 
 #menu-btn {
@@ -156,7 +156,7 @@ html {
 }
 
 #team-container, ul, form {
-   border-bottom: solid 0.3rem var(--red);
+   border-bottom: solid 0.3rem var(--main-light);
    padding-bottom: 2rem;
 }
 
@@ -250,7 +250,7 @@ input[type=text], input[type=email], input=[type=number] {
 
 #submit {
    border: none;
-   background-color: var(--red);
+   background-color: var(--main-dark);
    color: white;
    font-size: 1.2rem;
 }
@@ -285,7 +285,7 @@ li {
 #error-container button {
    width: 100%;
    border: none;
-   background-color: var(--red);
+   background-color: var(--main-dark);
    color: white;
    font-size: 1.2rem;
    height: 2rem;
