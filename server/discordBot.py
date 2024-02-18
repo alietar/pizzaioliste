@@ -42,8 +42,6 @@ class Bot(commands.Bot):
 
 
     async def on_message(self, _message):
-        print(f"New message from discord : {_message.content}")
-
         await self.handle_message(_message, False)
 
 
@@ -149,9 +147,8 @@ class Bot(commands.Bot):
 
 
     async def on_reaction_add(self, _reaction, _user):
-        print(_reaction.emoji)
-        if _reaction.emoji == "🍕":
-            await self.handle_message(_reaction.message, True)
+        #if _reaction.emoji == "🍕":
+        #    await self.handle_message(_reaction.message, True)
 
 
     async def annouce_sos(self, _sos):
