@@ -14,7 +14,7 @@
          <div>
             <a href="#order-header">Commander</a>
             <a href="#sos-header">Carte des SOS</a>
-            <a href="#team">L'équipe</a>
+            <!--<a href="#team">L'équipe</a>-->
             <a href="#reseaux">Réseaux</a>
          </div>
          <a id="menu-btn"><span class="material-symbols-outlined">menu</span></a>
@@ -67,12 +67,16 @@
                   <option value="3">18h-21h</option>
                </select>
             </div>
+            <div style="grid-area: comment">
+               <label for="comment">Remarque</label>
+               <input type="text" id="comment" name="comment" maxlength="20"/>
+            </div>
             <div style="grid-area: email;">
                <label for="email">Email de l'INSA</label>
                <input type="email" id="email" name="email" pattern=".+@insa-lyon\.fr" placeholder="leonardo.da-vinci@insa-lyon.fr" required>
             </div>
             <div id="confirmation-container" style="grid-area: condition;">
-               <label for="confirmation">J'accepte les conditions des SOS*</label>
+               <label for="confirmation">Je confirme être en 1A ou 2A et adhérer à la VA de l'INSA Lyon</label>
                <input type="checkbox" id="confirmation" name="confirmation" value="y" required />
             </div>
             <div style="grid-area: send;">
@@ -84,7 +88,7 @@
          <ul>
          </ul>
 
-         <h1 id="team">L'équipe</h1>
+         <!--<h1 id="team">L'équipe</h1>
          <div id="team-container">
             <div>
                <img src="img/1.jpg"/>
@@ -121,12 +125,12 @@
                <h5>Diavola</h5>
                <span>Thomas</span>
             </div>
-         </div>
+         </div>-->
          <h1 id="reseaux">Réseaux</h1>
          <div id="reseaux-container">
-            <a href="https://instagram.com"><img src="img/instagram.svg" height="24px"/></a>
-            <a href="htps://youtube.com"><img src="img/youtube.svg" height="24px"/></a>
-            <a href="https://messenger.com"><img src="img/messenger.svg" height="24px"/></a>
+            <a href="https://www.instagram.com/la.pizzaioliste/"><img src="img/instagram.svg" height="24px"/></a>
+            <a href="https://www.tiktok.com/@lapizzaioliste"><img src="img/tiktok.svg" height="24px"/></a>
+            <a href="https://bere.al/lapizzaioliste"><img src="img/bereal.svg" height="24px"/></a>
          </div>
       </main>
       <script type="text/javascript" src="js/main.js"></script>

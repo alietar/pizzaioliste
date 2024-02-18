@@ -176,8 +176,8 @@ class Bot(commands.Bot):
     async def send_sos(self, _sos, _channel):
         embed = discord.Embed(
             title = _sos[5],
-            description = f"Pour : {_sos[1]} {_sos[2]}\nAu : {_sos[7]}{str(_sos[8])}\nLe : {convert_timeslot(_sos[6])}",
+            description = f"Pour : {_sos[1]} {_sos[2]}\nAu : {_sos[7]}{str(_sos[8])}\nLe : {convert_timeslot(_sos[6])}\nRemarque : {_sos[10]}",
             color = discord.Colour.blurple()
         )
 
-        await _channel.send(f"Nouvelle commande de SOS n°{str(_sos[10])}", embed=embed)
+        await _channel.send(f"Nouvelle commande de SOS n°{str(_sos[11])}", embed=embed)

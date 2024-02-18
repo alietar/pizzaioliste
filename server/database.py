@@ -51,7 +51,8 @@ class DataBase:
                 timeslot TEXT,
                 bat TEXT,
                 turne INTEGER,
-                status TEXT
+                status TEXT,
+                comment TEXT
             )
         """
 
@@ -70,8 +71,9 @@ class DataBase:
                 timeslot,
                 bat,
                 turne,
-                status
-            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                status,
+                comment
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
 
         return await self.execute(sql=sql, parameters=data, get_id=True)
 

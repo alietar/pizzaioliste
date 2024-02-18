@@ -104,7 +104,7 @@ async def asked_sos(request):
         db = request.config_dict["DB"]
         sos_list = await db.get_all_sos()
 
-        response_content = {"format": ["ID", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Créneau", "Bat", "Turne", "État"], "sos": sos_list}
+        response_content = {"format": ["ID", "Création", "Prénom", "Nom", "Email", "Sos ID", "SOS Description", "Créneau", "Bat", "Turne", "État", "Remarque"], "sos": sos_list}
 
     return await respond(request, content=response_content, status=status)
 
@@ -160,7 +160,8 @@ async def add_sos(request):
             timeslot, # timeslot
             content["bat"], # bat
             int(content["nb"]), # turne
-            "pending" # is the sos done
+            "pending", # is the sos done
+            content["comment"] # is the sos done
         ]
 
 
